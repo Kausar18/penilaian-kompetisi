@@ -65,11 +65,13 @@ class DatabaseSeeder extends Seeder
     /** Akun reviewer contoh untuk pengembangan lokal (login: reviewerN / password). */
     private function reviewerContoh(): Collection
     {
+        // Nama sengaja dibuat jelas-jelas fiktif: repo ini publik, jangan sampai
+        // nama orang sungguhan terbawa sebagai akun contoh.
         $daftar = [
-            'reviewer1' => 'Deva Primadia Almada',
-            'reviewer2' => 'Nabila Rahmawati',
-            'reviewer3' => 'Farhan Maulana',
-            'reviewer4' => 'Sinta Kusuma Dewi',
+            'reviewer1' => 'Reviewer Contoh Satu',
+            'reviewer2' => 'Reviewer Contoh Dua',
+            'reviewer3' => 'Reviewer Contoh Tiga',
+            'reviewer4' => 'Reviewer Contoh Empat',
         ];
 
         foreach ($daftar as $username => $nama) {

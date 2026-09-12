@@ -427,17 +427,19 @@ class AdminSmokeTest extends TestCase
     /** Kota & provinsi ditebak dari alamat teks bebas (form tidak punya kolomnya). */
     public function test_kota_provinsi_ditebak_dari_alamat(): void
     {
+        // Semua alamat di bawah ini KARANGAN. Jangan pernah menyalin alamat
+        // peserta sungguhan ke dalam test — repo ini publik.
         $kasus = [
             // provinsi ditulis langsung
-            ['Kp Halimun, Jayamekar, Garut, Jawa Barat', 'Garut', 'Jawa Barat'],
+            ['Jl. Melati No. 1, Garut, Jawa Barat', 'Garut', 'Jawa Barat'],
             // provinsi TIDAK ditulis, disimpulkan dari nama kota
-            ['Kp. Tapos RT.002 RW.010 Kelurahan Tapos Kota Depok', 'Depok', 'Jawa Barat'],
+            ['Jl. Anggrek No. 2, Kelurahan Sukamaju, Kota Depok', 'Depok', 'Jawa Barat'],
             // singkatan
-            ['Jln raya ceger, pondok aren, tangsel', 'Tangerang Selatan', 'Banten'],
+            ['Jl. Kenanga No. 3, tangsel', 'Tangerang Selatan', 'Banten'],
             // nama panjang tidak boleh kalah oleh nama pendek
-            ['Perumahan X, Bandung Barat', 'Bandung Barat', 'Jawa Barat'],
+            ['Perumahan Contoh Blok A, Bandung Barat', 'Bandung Barat', 'Jawa Barat'],
             // alamat tanpa petunjuk wilayah -> dibiarkan kosong, bukan ditebak asal
-            ['Jl. Kutilang Raya VI No 77', null, null],
+            ['Jl. Dahlia No. 4', null, null],
         ];
 
         foreach ($kasus as [$alamat, $kota, $provinsi]) {
