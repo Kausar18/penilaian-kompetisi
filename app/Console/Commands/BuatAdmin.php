@@ -17,7 +17,7 @@ use function Laravel\Prompts\text;
  * memicunya, jadi tidak menambah permukaan serangan aplikasi.
  *
  *   php artisan admin:buat
- *   php artisan admin:buat --name="Deva Primadia Almada" --username=deva --password=rahasia123
+ *   php artisan admin:buat --name="Nama Reviewer" --username=juri1 --password=rahasia123
  *   php artisan admin:buat --username=deva --password=barulagi123                 # ganti sandi
  *   php artisan admin:buat --username=deva --name="Nama Baru"                     # ganti nama tampilan saja
  *   php artisan admin:buat --peran=reviewer --username=juri1 --name="..." --password=...
