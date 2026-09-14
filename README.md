@@ -1,9 +1,37 @@
-# Sistem Penilaian Kompetisi — Panel Admin (Fase 1)
+# Sistem Penilaian Seleksi Startup PRIMESTeP
 
-Panel admin untuk penilaian kompetisi (referensi: dashboard YSIC 2026 "Halal Startup Competition").
-Dibangun dengan Laravel 13 + Blade + Bootstrap 5 + Chart.js, mengikuti pola project **Sistem Inklusi**.
+Aplikasi web untuk menjalankan seleksi tenant program **PRIMESTeP** (Science Techno Park IPB):
+menggantikan alur lama yang mengisi formulir di kertas lalu direkap ulang ke Excel.
 
-## Cakupan Fase 1
+Seleksinya **dua tahap**, dan sistem ini mengikuti keduanya persis seperti formulir aslinya:
+
+```
+Pendaftar masuk (impor dari Google Form)
+   -> Tahap 1  Verifikasi Administrasi   : checklist 13 butir Juklak
+   -> lolos
+   -> Tahap 2  Penilaian Substansi       : rubrik berbobot, nilai maksimum 900
+   -> Rekap & peringkat
+   -> (opsional) Pengumuman ke halaman publik
+```
+
+Dibangun dengan **Laravel 13**, **PHP 8.3**, **MySQL**, **Bootstrap 5.3**, dan **Chart.js 4.4**.
+
+## Status proyek
+
+| Bagian | Status |
+|---|---|
+| Impor data Google Form (CSV/Excel) | Selesai, teruji dengan 150 pendaftar nyata |
+| Tahap 1 — Verifikasi Administrasi | Selesai |
+| Tahap 2 — Penilaian Substansi | Selesai |
+| Rekap & peringkat, export CSV | Selesai |
+| Penugasan reviewer | Selesai |
+| Halaman publik + statistik pengunjung | Selesai |
+| Pembakuan daftar bidang usaha | **Belum** — kolomnya isian bebas di Google Form, menghasilkan 37 nilai berbeda |
+| Cetak formulir penilaian ke PDF | **Belum** |
+
+Diuji dengan **91 test otomatis** (`php artisan test`) dan gaya kode dijaga Laravel Pint.
+
+## Modul
 
 | Modul | Isi |
 |-------|-----|
@@ -52,8 +80,48 @@ form checklist, bukan dropdown.
 
 Buat akun reviewer: `php artisan admin:buat --peran=reviewer --username=juri1 --name="Nama Lengkap" --password=...`
 
-Belum termasuk (Fase 2): form pendaftaran publik, auto-sync Google Form, halaman cek status peserta,
+Belum termasuk: form pendaftaran publik, auto-sync Google Form, halaman cek status peserta,
 peran Reviewer Utama/Sharia + indikator per-peran, multi-reviewer per peserta + agregasi.
+
+## Skema basis data
+
+Alur data mengikuti dua tahap seleksi. Tanda panah menunjukkan relasi kunci asing.
+
+```
+kategori_peserta ──┐                    users (admin / reviewer)
+bidang_kompetisi ──┤                      │
+                   ▼                      │ reviewer_id
+                pendaftar ◄───────────────┘
+                   │
+                   ├──► anggota_tim                 (banyak per pendaftar)
+                   │
+                   ├──► verifikasi_administrasi     TAHAP 1, satu per pendaftar
+                   │         └──► detail_verifikasi ──► item_verifikasi (13 butir Juklak)
+                   │
+                   └──► penilaian                   TAHAP 2, satu per pendaftar
+                             └──► detail_penilaian ──► indikator_penilaian
+                                                          └──► kategori_penilaian
+```
+
+| Tabel | Isi |
+|---|---|
+| `pendaftar` | Data peserta hasil impor Google Form; kolom `data_asli` menyimpan baris mentahnya sebagai JSON |
+| `anggota_tim` | Anggota tim, hasil penguraian satu sel teks bebas |
+| `item_verifikasi` | Butir checklist Juklak — bisa diubah admin lewat menu Form Administrasi |
+| `verifikasi_administrasi` | Hasil tahap 1 per peserta (`lolos` / `tidak_lolos` / draft) |
+| `detail_verifikasi` | Jawaban per butir: `sesuai` / `tidak_sesuai` / `na`, beserta catatan |
+| `kategori_penilaian` · `indikator_penilaian` | Rubrik tahap 2 — kelompok dan indikator beserta bobotnya |
+| `penilaian` | Hasil tahap 2 per peserta: nilai akhir, rekomendasi, catatan RAB, kesimpulan |
+| `detail_penilaian` | Skor per indikator |
+| `pengaturan_penilaian` | Satu baris: skala nilai, rumus, dan gerbang "hanya peserta terverifikasi" |
+| `pengaturan_situs` | Satu baris: isi halaman publik dan saklar pengumuman |
+| `kunjungan` | Statistik pengunjung halaman publik; tidak menyimpan IP |
+| `import_log` | Riwayat tiap impor beserta jumlah baris berhasil/gagal |
+
+**Gerbang antar tahap.** Menu Penilaian, Penugasan, Rekap, dan Statistik menyaring peserta
+lewat `verifikasi_administrasi.hasil = 'lolos'` — **bukan** lewat kolom `pendaftar.status`.
+Kolom status hanya cermin agar mudah dibaca. Ini disengaja: pernah terjadi bug ketika keduanya
+bisa berbeda, sehingga peserta yang belum diverifikasi ikut muncul di daftar penilaian.
 
 ## Setup lokal (Laragon)
 
